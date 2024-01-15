@@ -1,3 +1,4 @@
+const User = require("../models/User_model");
 const validateMiddleware = (signupSchema) => async (req, res, next) => {
   const data = req.body;
   try {
@@ -44,4 +45,28 @@ const emailMiddleware = (emailSchema) => async (req, res, next) => {
   }
 };
 
-module.exports = {validateMiddleware, emailMiddleware , contactMiddleware};
+const otpMiddleware = () => async (req, res, next) => {
+  try {
+    const Userstate = await User.findOne({ email: req.body.email });
+    const isVerfied = Userstate.isVerified;
+    if (isVerfied) {
+      res.status(200).json({ msg: "You are already Verfied" });
+    } else {
+      next();
+    }
+  } catch (error) {
+    const err = {
+      status: 422,
+      msg: "something went wrong",
+      extraD: "May be you are not registered",
+    };
+    next(err);
+  }
+};
+
+module.exports = {
+  validateMiddleware,
+  emailMiddleware,
+  contactMiddleware,
+  otpMiddleware,
+};
