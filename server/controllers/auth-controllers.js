@@ -1,5 +1,6 @@
 const User = require("../models/User_model");
 const Otp = require("../models/Otp_model");
+const sendMail = require("../utils/sendmail");
 
 const register = async (req, res) => {
   try {
@@ -70,9 +71,11 @@ const otp = async (req, res) => {
           email: email.toLowerCase(),
           otp: otp,
         });
-        if (otpCreated) {
+        const mailSent = await sendMail(email, "user", findUser.firstName , otp);
+        if (otpCreated && mailSent) {
           res.status(200).json({
             msg: "OTP sent successfully",
+            extraD: "Please check your email"
           });
         } else {
           res.status(400).json({ msg: "OTP generation failed" });
