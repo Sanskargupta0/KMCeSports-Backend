@@ -97,31 +97,57 @@ const validateOtp = async (req, res) => {
         .status(400)
         .json({ msg: "User not found \n Please Register yourself" });
     } else {
-      if (userExists.otp === otp) {
-        const deleted = await Otp.deleteOne({
-          email: email.toLowerCase(),
-          otp: otp,
-        });
-        if (deleted) {
-          const verfiy = await User.updateOne({ isVerified: true });
-          if (verfiy) {
-            res.status(200).json({
-              msg: "OTP validation successful",
-            });
+      if (userExists.attempt === 3) {
+        const curentDate = Date();
+        const otpCreationDate = userExists.date;
+        const timeDiff = timeDifference(otpCreationDate, curentDate);
+        if (timeDiff) {
+          await Otp.updateOne({ attempt: 0, date: Date() });
+          res.status(200).json({
+            msg: "Attempt reset successfully",
+            extraD: "Please try again",
+          });
+        } else {
+          res.status(400).json({
+            msg: "OTP validation failed please try again after 1 hours",
+          });
+        }
+      } else {
+        if (userExists.otp === otp) {
+          const deleted = await Otp.deleteOne({
+            email: email.toLowerCase(),
+          });
+          if (deleted) {
+            const verfiy = await User.updateOne({ isVerified: true });
+            if (verfiy) {
+              res.status(200).json({
+                msg: "OTP validation successful",
+              });
+            } else {
+              res.status(400).json({
+                msg: "OTP validation failed to uptade user Status please try again",
+              });
+            }
           } else {
             res
               .status(400)
-              .json({
-                msg: "OTP validation failed to uptade user Status please try again",
-              });
+              .json({ msg: "OTP validation failed/delete please try again" });
           }
         } else {
-          res
-            .status(400)
-            .json({ msg: "OTP validation failed/delete please try again" });
+          const attempt = userExists.attempt + 1;
+          const updateAttempt = await Otp.updateOne({ attempt: attempt });
+          if (updateAttempt) {
+            res.status(400).json({
+              msg: "Invalid OTP validation failed please try again",
+              extraD: `attempt left ${3 - attempt} out of 3`,
+            });
+          } else {
+            res.status(400).json({
+              msg: "validation failed please try again",
+              extraD: "attempt update failed",
+            });
+          }
         }
-      } else {
-        res.status(400).json({ msg: "Invalid OTP validation failed please try again" });
       }
     }
   } catch (error) {
@@ -132,5 +158,16 @@ const validateOtp = async (req, res) => {
     };
   }
 };
+
+function timeDifference(dateString1, dateString2) {
+  const date1 = new Date(dateString1);
+  const date2 = new Date(dateString2);
+  const timeDifference = Math.abs(date2 - date1);
+  if (timeDifference > 3600000) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 module.exports = { login, register, otp, validateOtp };
