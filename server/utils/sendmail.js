@@ -440,7 +440,3 @@ KMCeSports Team
 }
 
 module.exports = sendMail;
-
-// sendMail("sanskar362002@gmail.com", "reset", "test", 2222)
-//   .then((result) => console.log("Email sent...", result))
-//   .catch((error) => console.log(error.message));

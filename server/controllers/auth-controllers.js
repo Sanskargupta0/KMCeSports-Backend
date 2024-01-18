@@ -1,5 +1,6 @@
 const User = require("../models/User_model");
 const Otp = require("../models/Otp_model");
+const bcrypt = require("bcrypt")
 const sendMail = require("../utils/sendmail");
 
 const register = async (req, res) => {
@@ -7,9 +8,21 @@ const register = async (req, res) => {
     const { userName, firstName, lastName, email, password } = req.body;
 
     const userExists = await User.findOne({ email: email.toLowerCase() });
-    if (userExists) {
+    if (userExists && userExists.isVerified) {
       res.status(400).json({ msg: "user already exists" });
-    } else {
+    } else {if(userExists){
+
+      const userUpdate = await userExists.updateOne({
+        userName,
+        firstName,
+        lastName,
+        email: email.toLowerCase(),
+        password: await updatepass(password),
+      });
+      res.status(201).json({
+        msg: "Reregistation successful",
+      });
+    }else{
       const userCreated = await User.create({
         userName,
         firstName,
@@ -19,10 +32,9 @@ const register = async (req, res) => {
       });
       res.status(201).json({
         msg: "registation successful",
-        token: await userCreated.generateAuthToken(),
-        userid: userCreated._id.toString(),
       });
     }
+  }
   } catch (err) {
     console.log(err);
   }
@@ -35,6 +47,7 @@ const login = async (req, res) => {
     if (!userExists) {
       res.status(400).json({ msg: "Invalid Credentials" });
     } else {
+      if(userExists.isVerified===true){
       const isMatch = await userExists.comparePassword(password);
       if (!isMatch) {
         res.status(401).json({ msg: "Invalid email or password Credentials" });
@@ -46,6 +59,10 @@ const login = async (req, res) => {
         });
       }
     }
+    else {
+      res.status(401).json({ msg: "Please verify your Email Id"})
+    }
+  }
   } catch (err) {
     res.status(500).json({ msg: err });
   }
@@ -98,7 +115,7 @@ const validateOtp = async (req, res) => {
     if (!userExists) {
       res
         .status(400)
-        .json({ msg: "User not found \n Please Register yourself" });
+        .json({ msg: "User not found \n Please Genrate your OTP" });
     } else {
       if (userExists.attempt === 3) {
         const curentDate = Date();
@@ -121,7 +138,10 @@ const validateOtp = async (req, res) => {
             email: email.toLowerCase(),
           });
           if (deleted) {
-            const verfiy = await User.updateOne({ isVerified: true });
+            const verfiy = await User.updateOne(
+              { email: email.toLowerCase() },
+              { $set: { isVerified: true } }
+            );
             if (verfiy) {
               res.status(200).json({
                 msg: "OTP validation successful",
@@ -172,5 +192,20 @@ function timeDifference(dateString1, dateString2) {
     return false;
   }
 }
+
+const updatepass = async function (password){
+  try {
+    const saltRound = await bcrypt.genSalt(10);
+    const hash_password = await bcrypt.hash(password, saltRound);
+    return hash_password;
+  } catch (error) {
+    err = {
+      status:"400",
+      msg:"Failed to update the password",
+      extrsD:error
+    }
+    next(err);
+  }
+};
 
 module.exports = { login, register, otp, validateOtp };

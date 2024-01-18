@@ -47,7 +47,7 @@ const emailMiddleware = (emailSchema) => async (req, res, next) => {
 
 const otpMiddleware = () => async (req, res, next) => {
   try {
-    const Userstate = await User.findOne({ email: req.body.email });
+    const Userstate = await User.findOne({ email: req.body.email.toLowerCase() });
     const isVerfied = Userstate.isVerified;
     if (isVerfied) {
       res.status(200).json({ msg: "You are already Verfied" });
