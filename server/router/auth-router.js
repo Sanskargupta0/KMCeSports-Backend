@@ -4,7 +4,7 @@ const authControllers = require("../controllers/auth-controllers");
 const signupSchema = require("../validator/auth-validator");
 const Schema = require("../validator/contact-validator");
 const Middleware = require("../middleware/validate-middleware");
-const otpSchema = require("../validator/otp-validator");
+const Otp = require("../validator/otp-validator");
 
 // two ways to write the same thing
 // router.get("/", (req, res) => {
@@ -21,9 +21,15 @@ router
   .post(authControllers.login);
 router
   .route("/validateUser")
-  .post(Middleware.emailMiddleware(Schema.emailSchema),Middleware.otpMiddleware(), authControllers.otp);
+  .post(Middleware.schemaMiddleware(Schema.emailSchema),Middleware.otpMiddleware(), authControllers.otp);
 router
   .route("/validateOtp")
-  .post(Middleware.emailMiddleware(otpSchema),Middleware.otpMiddleware(),authControllers.validateOtp);
+  .post(Middleware.schemaMiddleware(Otp.otpSchema),Middleware.otpMiddleware(),authControllers.validateOtp);
+router
+  .route("/forgotPassword")
+  .post(Middleware.schemaMiddleware(Schema.emailSchema),authControllers.forgotPassword);
+router
+  .route("/validatePassResetOTP")
+  .post(Middleware.schemaMiddleware(Otp.resetOtpSchema),authControllers.validatePassResetOTP);
 
 module.exports = router;

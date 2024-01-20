@@ -11,6 +11,6 @@ router
 
 router
  .route('/subscribeEmail')
- .post(validate.emailMiddleware(Schema.emailSchema),contact.subscribeEmail);
+ .post(validate.schemaMiddleware(Schema.emailSchema),contact.subscribeEmail);
 
 module.exports=router;

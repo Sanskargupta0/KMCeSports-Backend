@@ -29,10 +29,10 @@ const contactMiddleware = (contactSchema) => async (req, res, next) => {
     next(err);
   }
 };
-const emailMiddleware = (emailSchema) => async (req, res, next) => {
+const schemaMiddleware = (schema) => async (req, res, next) => {
   const data = req.body;
   try {
-    const parsedData = await emailSchema.parseAsync(data);
+    const parsedData = await schema.parseAsync(data);
     req.body = parsedData;
     next();
   } catch (error) {
@@ -57,8 +57,7 @@ const otpMiddleware = () => async (req, res, next) => {
   } catch (error) {
     const err = {
       status: 422,
-      msg: "something went wrong",
-      extraD: "May be you are not registered",
+      msg: "You are not registered"
     };
     next(err);
   }
@@ -66,7 +65,7 @@ const otpMiddleware = () => async (req, res, next) => {
 
 module.exports = {
   validateMiddleware,
-  emailMiddleware,
+  schemaMiddleware,
   contactMiddleware,
   otpMiddleware,
 };
