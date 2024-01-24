@@ -3,16 +3,13 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userSchema = new mongoose.Schema({
   userName: {
-    type: String,
-    required: [true, "Please provide a username"],
+    type: String
   },
   firstName: {
     type: String,
-    required: [true, "Please provide a firstname"],
   },
   lastName: {
     type: String,
-    required: [true, "Please provide a lastname"],
   },
   email: {
     type: String,
@@ -20,7 +17,14 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Please provide a password"],
+  },
+  Phone: {
+    type: Number,
+    default: null,
+  },
+  AvatarURL: {
+    type: String,
+    default: "",
   },
   isVerified: {
     type: Boolean,

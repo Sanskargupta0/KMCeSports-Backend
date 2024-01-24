@@ -20,7 +20,7 @@ const register = async (req, res) => {
         });
       } else {
         if (userExists) {
-           await userExists.updateOne({
+          await userExists.updateOne({
             userName,
             firstName,
             lastName,
@@ -241,7 +241,7 @@ const forgotPassword = async (req, res) => {
 };
 
 const validatePassResetOTP = async (req, res) => {
-  const { email, otp, password} = req.body;
+  const { email, otp, password } = req.body;
   try {
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
@@ -276,7 +276,10 @@ const validatePassResetOTP = async (req, res) => {
         } else {
           if (otpExists.otp === otp) {
             otpForResetPass.delete(email.toLowerCase());
-            await User.updateOne({ email: email.toLowerCase() }, { $set: { password: await genrateNewPass(password) } });
+            await User.updateOne(
+              { email: email.toLowerCase() },
+              { $set: { password: await genrateNewPass(password) } }
+            );
             res.status(200).json({ msg: "OTP validation successful" });
           } else {
             const attempt = otpExists.attempt + 1;
@@ -295,6 +298,53 @@ const validatePassResetOTP = async (req, res) => {
       status: 500,
       extraD: error,
     };
+  }
+};
+
+const loginWithSocialMedia = async (req, res) => {
+  const { email, displayName, photoURL, phoneNumber } = req.body;
+  let userPhone = phoneNumber || 0;
+  try {
+    const userExists = await User.findOne({ email: email.toLowerCase() });
+    if (!userExists) {
+      firstName = displayName.split(" ")[0];
+      lastName = displayName.split(" ")[1] || "";
+      userName =
+        `${firstName}` + Math.floor(1000 + Math.random() * 9000).toString();
+
+      const userCreated = await User.create({
+        userName: userName,
+        firstName: firstName,
+        lastName: lastName,
+        email: email.toLowerCase(),
+        password: await genrateNewPass("12345678"),
+        AvatarURL: photoURL,
+        Phone: userPhone,
+        isVerified: true,
+      });
+      res.status(201).json({
+        msg: "Registation successful",
+        token: await userCreated.generateAuthToken(),
+      });
+    } else {
+      if (userExists.isVerified === false) {
+        await userExists.updateOne(
+          {
+            isVerified: true,
+            Phone: userPhone,
+            AvatarURL: photoURL
+          }
+        );
+        //await sendMail(email, "user", userExists.firstName, "12345678");
+      }
+      res.status(200).json({
+        msg: "login successful",
+        token: await userExists.generateAuthToken(),
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: error });
   }
 };
 
@@ -341,4 +391,5 @@ module.exports = {
   validateOtp,
   forgotPassword,
   validatePassResetOTP,
+  loginWithSocialMedia,
 };

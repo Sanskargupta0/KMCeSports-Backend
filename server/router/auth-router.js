@@ -31,5 +31,8 @@ router
 router
   .route("/validatePassResetOTP")
   .post(Middleware.schemaMiddleware(Otp.resetOtpSchema),authControllers.validatePassResetOTP);
+router
+  .route("/loginWithSocialMedia")
+  .post(authControllers.loginWithSocialMedia);
 
 module.exports = router;
