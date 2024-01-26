@@ -52,13 +52,15 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-userSchema.methods.generateAuthToken = function () {
+userSchema.methods.generateAuthToken = function (rememberMe) {
   const user = this;
+  const time = rememberMe ? "7d" : "1h";
+  console.log(time)
   try {
     const token = jwt.sign(
       { userid: user._id.toString(), email: user.email, isadmin: user.isadmin },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: time }
     );
     return token;
   } catch (error) {

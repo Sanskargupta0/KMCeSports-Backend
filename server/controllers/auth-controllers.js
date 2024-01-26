@@ -55,7 +55,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password , rememberMe } = req.body;
     const userExists = await User.findOne({ email: email.toLowerCase() });
     if (!userExists) {
       res.status(400).json({ msg: "Invalid Credentials" });
@@ -69,7 +69,7 @@ const login = async (req, res) => {
         } else {
           res.status(200).json({
             msg: "login successful",
-            token: await userExists.generateAuthToken(),
+            token: await userExists.generateAuthToken(rememberMe),
           });
         }
       } else {
@@ -309,23 +309,23 @@ const loginWithSocialMedia = async (req, res) => {
   try {
     const userExists = await User.findOne({ email: email.toLowerCase() });
     if (!userExists) {
-     let firstName = displayName.split(" ")[0];
-     let lastName = displayName.split(" ")[1] || "";
-     let userName =
+     const firstName = displayName.split(" ")[0];
+     const lastName = displayName.split(" ")[1] || "";
+     const userName =
         `${firstName}` + Math.floor(1000 + Math.random() * 9000).toString();
-     let password = Math.floor(10000000 + Math.random() * 90000000).toString();
-
+     const password = Math.floor(10000000 + Math.random() * 90000000).toString();
+console.log(firstName,lastName,userName,password,email,photoURL,userPhone)
       const userCreated = await User.create({
         userName: userName,
         firstName: firstName,
         lastName: lastName,
         email: email.toLowerCase(),
-        password: await genrateNewPass(password),
+        password: password,
         avatarURL: photoURL,
         phone: userPhone,
         isVerified: true,
       });
-      await sendMail(email, "login", firstName, password);
+       await sendMail(email, "login", firstName, password);
       res.status(201).json({
         msg: "Registation successful",
         token: await userCreated.generateAuthToken(),
