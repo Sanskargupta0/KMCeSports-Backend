@@ -314,7 +314,6 @@ const loginWithSocialMedia = async (req, res) => {
      const userName =
         `${firstName}` + Math.floor(1000 + Math.random() * 9000).toString();
      const password = Math.floor(10000000 + Math.random() * 90000000).toString();
-console.log(firstName,lastName,userName,password,email,photoURL,userPhone)
       const userCreated = await User.create({
         userName: userName,
         firstName: firstName,
