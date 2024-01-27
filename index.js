@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   res.setHeader(
     "Access-Control-Allow-Origin",
-    "https://kmc-esports-frontend.vercel.app"
+    "http://localhost:5173"
   );
   res.setHeader(
     "Access-Control-Allow-Methods",

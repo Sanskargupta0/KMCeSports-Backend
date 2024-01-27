@@ -5,6 +5,7 @@ const signupSchema = require("../validator/auth-validator");
 const Schema = require("../validator/contact-validator");
 const Middleware = require("../middleware/validate-middleware");
 const Otp = require("../validator/otp-validator");
+const authToken = require("../middleware/auth-token")
 
 // two ways to write the same thing
 // router.get("/", (req, res) => {
@@ -34,5 +35,10 @@ router
 router
   .route("/loginWithSocialMedia")
   .post(authControllers.loginWithSocialMedia);
+router
+  .route("/tokenValidation")
+  .post(authToken,(req,res)=>{
+    res.status(200).json({msg:"Token is valid"})
+  });
 
 module.exports = router;

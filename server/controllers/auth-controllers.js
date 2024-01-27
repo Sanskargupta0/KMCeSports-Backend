@@ -55,7 +55,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password , rememberMe } = req.body;
+    const { email, password, rememberMe } = req.body;
     const userExists = await User.findOne({ email: email.toLowerCase() });
     if (!userExists) {
       res.status(400).json({ msg: "Invalid Credentials" });
@@ -103,7 +103,7 @@ const otp = async (req, res) => {
         otp: otp,
       });
       const mailSent = await sendMail(email, "user", findUser.firstName, otp);
-      if (otpCreated && mailSent) {
+      if (otpCreated && mailSent.accepted[0] === `${email}`) {
         res.status(200).json({
           msg: "OTP sent successfully",
           extraD: "Please check your email",
@@ -111,6 +111,7 @@ const otp = async (req, res) => {
         });
       } else {
         res.status(400).json({ msg: "OTP generation failed" });
+        Otp.deleteOne({ email: email.toLowerCase() });
       }
     }
   } catch (error) {
@@ -223,7 +224,7 @@ const forgotPassword = async (req, res) => {
             userExists.firstName,
             otp
           );
-          if (mailSent) {
+          if (mailSent.accepted[0] === `${email}`) {
             res.status(200).json({
               msg: "OTP sent successfully",
               extraD: "Please check your email",
@@ -231,6 +232,7 @@ const forgotPassword = async (req, res) => {
             });
           } else {
             res.status(400).json({ msg: "OTP generation failed" });
+            otpForResetPass.delete(email.toLowerCase());
           }
         }
       } else {
@@ -309,11 +311,13 @@ const loginWithSocialMedia = async (req, res) => {
   try {
     const userExists = await User.findOne({ email: email.toLowerCase() });
     if (!userExists) {
-     const firstName = displayName.split(" ")[0];
-     const lastName = displayName.split(" ")[1] || "";
-     const userName =
+      const firstName = displayName.split(" ")[0];
+      const lastName = displayName.split(" ")[1] || "";
+      const userName =
         `${firstName}` + Math.floor(1000 + Math.random() * 9000).toString();
-     const password = Math.floor(10000000 + Math.random() * 90000000).toString();
+      const password = Math.floor(
+        10000000 + Math.random() * 90000000
+      ).toString();
       const userCreated = await User.create({
         userName: userName,
         firstName: firstName,
@@ -324,20 +328,26 @@ const loginWithSocialMedia = async (req, res) => {
         phone: userPhone,
         isVerified: true,
       });
-       await sendMail(email, "login", firstName, password);
-      res.status(201).json({
-        msg: "Registation successful",
-        token: await userCreated.generateAuthToken(),
-      });
+      const mailSent = await sendMail(email, "login", firstName, password);
+      if (mailSent.accepted[0] === `${email}`) {
+        res.status(201).json({
+          msg: "Registation successful",
+          token: await userCreated.generateAuthToken(),
+        });
+      } else {
+        res.status(400).json({
+          msg: "Registation Failed",
+          extrD: "Failed to send mail please contact Administrator",
+        });
+        User.deleteOne({ email: email.toLowerCase() });
+      }
     } else {
       if (userExists.isVerified === false) {
-        await userExists.updateOne(
-          {
-            isVerified: true,
-            phone: userPhone,
-            avatarURL: photoURL
-          }
-        );
+        await userExists.updateOne({
+          isVerified: true,
+          phone: userPhone,
+          avatarURL: photoURL,
+        });
       }
       res.status(200).json({
         msg: "login successful",
