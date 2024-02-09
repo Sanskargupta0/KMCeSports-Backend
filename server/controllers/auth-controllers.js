@@ -120,6 +120,7 @@ const otp = async (req, res) => {
       status: 500,
       extraD: error,
     };
+    next(err);
   }
 };
 
@@ -194,6 +195,7 @@ const validateOtp = async (req, res) => {
       status: 500,
       extraD: error,
     };
+    next(err);
   }
 };
 
@@ -302,6 +304,7 @@ const validatePassResetOTP = async (req, res) => {
       status: 500,
       extraD: error,
     };
+    next(err);
   }
 };
 
@@ -396,12 +399,12 @@ const genrateNewPass = async function (password) {
 
 function generateAvatar() {
   const avatars = [
-    "images.Cat",
-    "images.Crocodile",
-    "images.Girl",
-    "images.Gorilla",
-    "images.Mummy",
-    "images.Ninja",
+    "Cat",
+    "Crocodile",
+    "Girl",
+    "Gorilla",
+    "Mummy",
+    "Ninja",
   ];
   const randomIndex = Math.floor(Math.random() * avatars.length);
   return avatars[randomIndex];

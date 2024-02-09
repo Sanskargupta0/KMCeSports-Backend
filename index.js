@@ -5,6 +5,7 @@ const cors = require("cors");
 const authRouter = require("./server/router/auth-router");
 const contactRouter = require("./server/router/contact-router");
 const userRouter = require("./server/router/userData-router");
+const gameRouter = require("./server/router/gameData-router");
 const connectDB = require("./server/utils/db");
 const errorMiddleware = require("./server/middleware/error_middleware");
 
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 app.use("/", authRouter);
 app.use("/", contactRouter);
 app.use("/", userRouter);
+app.use("/", gameRouter);
 
 app.use(errorMiddleware);
 
