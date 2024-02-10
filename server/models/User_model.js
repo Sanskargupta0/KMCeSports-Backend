@@ -19,8 +19,8 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   phone: {
-    type: Number,
-    default: null,
+    type: String,
+    default: "",
   },
   avatarURL: {
     type: String,
@@ -37,6 +37,24 @@ const userSchema = new mongoose.Schema({
   bookmarks: {
     type: Array,
     default: [],
+  },
+  facebook: {
+    type: String,
+    default: "",
+  },
+  instagram: {
+    type: String,
+    default: "",
+  },
+  tournaments:{
+    participated: {
+      type: Number,
+      default: 0,
+    },
+    won: {
+      type: Number,
+      default: 0,
+    },
   },
 });
 

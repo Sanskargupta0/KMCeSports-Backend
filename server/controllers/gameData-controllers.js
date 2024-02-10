@@ -5,9 +5,8 @@ const UpcommingGames = require("../models/UpcomingEvents_model");
 const gamedata = async (req, res, next) => {
   try {
     const gameData = await Games.find();
-    const userBookmark = await User.findById(req.user.userid).select("bookmarks");
     const commingSoonData = await UpcommingGames.find();
-    res.status(200).json({ gameData , userBookmark: userBookmark.bookmarks, commingSoonData});
+    res.status(200).json({ gameData , commingSoonData});
   } catch (error) {
     err = {
         msg: "Failed to get Games Data and BookMark Data",

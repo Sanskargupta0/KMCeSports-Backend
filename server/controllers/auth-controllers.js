@@ -310,52 +310,56 @@ const validatePassResetOTP = async (req, res) => {
 
 const loginWithSocialMedia = async (req, res) => {
   const { email, displayName, photoURL, phoneNumber } = req.body;
-  let userPhone = phoneNumber || 0;
+  let userPhone = phoneNumber || "";
   try {
-    const userExists = await User.findOne({ email: email.toLowerCase() });
-    if (!userExists) {
-      const firstName = displayName.split(" ")[0];
-      const lastName = displayName.split(" ")[1] || "";
-      const userName =
-        `${firstName}` + Math.floor(1000 + Math.random() * 9000).toString();
-      const password = Math.floor(
-        10000000 + Math.random() * 90000000
-      ).toString();
-      const userCreated = await User.create({
-        userName: userName,
-        firstName: firstName,
-        lastName: lastName,
-        email: email.toLowerCase(),
-        password: password,
-        avatarURL: photoURL,
-        phone: userPhone,
-        isVerified: true,
-      });
-      const mailSent = await sendMail(email, "login", firstName, password);
-      if (mailSent.accepted[0] === `${email}`) {
-        res.status(201).json({
-          msg: "Registation successful",
-          token: await userCreated.generateAuthToken(),
-        });
-      } else {
-        res.status(400).json({
-          msg: "Registation Failed",
-          extrD: "Failed to send mail please contact Administrator",
-        });
-        User.deleteOne({ email: email.toLowerCase() });
-      }
+    if (email === undefined || email === null || email === "") {
+      res.status(400).json({ msg: "Email is not provided in twitter Account" });
     } else {
-      if (userExists.isVerified === false) {
-        await userExists.updateOne({
-          isVerified: true,
-          phone: userPhone,
+      const userExists = await User.findOne({ email: email.toLowerCase() });
+      if (!userExists) {
+        const firstName = displayName.split(" ")[0];
+        const lastName = displayName.split(" ")[1] || "";
+        const userName =
+          `${firstName}` + Math.floor(1000 + Math.random() * 9000).toString();
+        const password = Math.floor(
+          10000000 + Math.random() * 90000000
+        ).toString();
+        const userCreated = await User.create({
+          userName: userName,
+          firstName: firstName,
+          lastName: lastName,
+          email: email.toLowerCase(),
+          password: password,
           avatarURL: photoURL,
+          phone: userPhone,
+          isVerified: true,
+        });
+        const mailSent = await sendMail(email, "login", firstName, password);
+        if (mailSent.accepted[0] === `${email}`) {
+          res.status(201).json({
+            msg: "Registation successful",
+            token: await userCreated.generateAuthToken(),
+          });
+        } else {
+          res.status(400).json({
+            msg: "Registation Failed",
+            extrD: "Failed to send mail please contact Administrator",
+          });
+          User.deleteOne({ email: email.toLowerCase() });
+        }
+      } else {
+        if (userExists.isVerified === false) {
+          await userExists.updateOne({
+            isVerified: true,
+            phone: userPhone,
+            avatarURL: photoURL,
+          });
+        }
+        res.status(200).json({
+          msg: "login successful",
+          token: await userExists.generateAuthToken(),
         });
       }
-      res.status(200).json({
-        msg: "login successful",
-        token: await userExists.generateAuthToken(),
-      });
     }
   } catch (error) {
     console.log(error);
@@ -398,14 +402,7 @@ const genrateNewPass = async function (password) {
 };
 
 function generateAvatar() {
-  const avatars = [
-    "Cat",
-    "Crocodile",
-    "Girl",
-    "Gorilla",
-    "Mummy",
-    "Ninja",
-  ];
+  const avatars = ["Cat", "Crocodile", "Girl", "Gorilla", "Mummy", "Ninja"];
   const randomIndex = Math.floor(Math.random() * avatars.length);
   return avatars[randomIndex];
 }
