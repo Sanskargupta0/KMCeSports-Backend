@@ -22,7 +22,7 @@ app.use(express.urlencoded({ limit: "1mb", extended: true }));
 app.use((req, res, next) => {
   res.setHeader(
     "Access-Control-Allow-Origin",
-    "http://localhost:5173"
+    `${process.env.FRONTEND_URL}`
   );
   res.setHeader(
     "Access-Control-Allow-Methods",
