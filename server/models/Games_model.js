@@ -31,10 +31,22 @@ const gameSchema = new Schema({
         currentLeftSpace:{type: Number,
         required: [true, "Number of Players space left is required"]},
     },
+    price:{
+        type: Number,
+        required: [true, "Price in Rs is required"]
+    },
+    instruction:{
+        type: String,
+        required: [true, "Instruction is required"]
+    },
     playerdata: {
         type: Array,
         default: [],
-    }
+    },
+    form: {
+        type: Array,
+        default: [],
+    },
 });
 
 const Game = new model("Game", gameSchema);

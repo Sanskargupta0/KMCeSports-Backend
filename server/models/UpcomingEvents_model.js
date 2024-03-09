@@ -9,9 +9,9 @@ const UpcomingEventsSchema = new Schema({
         type: String,
         required: [true, "Extra Details is required"]
     },
-    link: {
+    extraDetails: {
         type: String,
-        required: [true, "Link for the Registartion page"]
+        required: [true, "extraDetails is required"]
     },
     image: {
         type: String,

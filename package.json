@@ -17,6 +17,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.4",
     "nodemailer": "^6.9.8",
+    "razorpay": "^2.9.2",
+    "socket.io": "^4.7.4",
     "zod": "^3.22.4"
   }
 }

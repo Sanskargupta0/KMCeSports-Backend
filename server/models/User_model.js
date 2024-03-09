@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userSchema = new mongoose.Schema({
   userName: {
-    type: String
+    type: String,
   },
   firstName: {
     type: String,
@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
-  tournaments:{
+  tournaments: {
     participated: {
       type: Number,
       default: 0,
@@ -55,6 +55,16 @@ const userSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
+  },
+  notifications: [
+    {
+      message: { type: String, default: "" },
+      date: { type: Date, default: Date.now },
+    },
+  ],
+  joinedGames: {
+    type: Array,
+    default: [],
   },
 });
 
@@ -97,7 +107,7 @@ userSchema.methods.comparePassword = async function (password) {
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 const User = mongoose.model("Users", userSchema);
 

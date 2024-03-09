@@ -1,20 +1,16 @@
 require("dotenv").config();
+const http = require("http");
 const express = require("express");
 const app = express();
-const cors = require("cors");
+const server = http.createServer(app);
+const socket = require("./server/utils/socket");
 const authRouter = require("./server/router/auth-router");
 const contactRouter = require("./server/router/contact-router");
 const userRouter = require("./server/router/userData-router");
 const gameRouter = require("./server/router/gameData-router");
 const connectDB = require("./server/utils/db");
 const errorMiddleware = require("./server/middleware/error_middleware");
-
-// var corsOptions = {
-//   origin: "http://localhost:5173",
-//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-//   credentials: true,
-// };
-// app.use(cors(corsOptions));
+const paymentRouter = require("./server/router/payment-router");
 
 
 app.use(express.json({ limit: "1mb" }));
@@ -40,6 +36,7 @@ app.use((req, res, next) => {
   next();
 });
 
+socket(server);
 app.get("/", (req, res) => {
   res.status(200).send("KMCeSports Backend");
 });
@@ -47,13 +44,14 @@ app.use("/", authRouter);
 app.use("/", contactRouter);
 app.use("/", userRouter);
 app.use("/", gameRouter);
+app.use("/", paymentRouter);
 
 app.use(errorMiddleware);
 
 const port = process.env.Port || 3000;
 
 connectDB().then(() => {
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Server listening on port ${port}`);
   });
 });
