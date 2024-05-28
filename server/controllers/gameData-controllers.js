@@ -52,4 +52,18 @@ const userBookmarkRemove = async (req, res, next) => {
   }
 };
 
-module.exports = { gamedata, userBookmarkAdd, userBookmarkRemove };
+const userJoinedGames = async(req, res, next)=>{
+try {
+  const user = await User.findById(req.user.userid);
+  res.status(200).json(user.joinedGames);
+} catch (error) {
+  err = {
+    msg: "Failed to Get User Joined Games",
+    status: 500,
+    extrD: error
+    };
+    next(err);
+}
+};
+
+module.exports = { gamedata, userBookmarkAdd, userBookmarkRemove, userJoinedGames };

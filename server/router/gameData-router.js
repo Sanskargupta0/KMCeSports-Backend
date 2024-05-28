@@ -15,4 +15,8 @@ router
     .route("/userBookmarkRemove")
     .post(authToken, gameControllers.userBookmarkRemove);
 
+router
+    .route("/userJoinedGames")
+    .get(authToken, gameControllers.userJoinedGames);    
+
 module.exports = router;

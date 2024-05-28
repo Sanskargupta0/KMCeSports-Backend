@@ -8,7 +8,7 @@ const createOrder = async (req, res) => {
   try {
     const joinedUser = await joinedGames.findById(gameId);
     
-    if(joinedUser.playerdata.includes(req.user.userid)){
+    if(joinedUser.playerdata.some(player => player.id === req.user.userid)){
       return res.status(200).json({success: false, msg: "You have already joined this game"});
     }
     else if(joinedUser.playerdata.length === joinedUser.numberofPlayers.number){
@@ -44,13 +44,14 @@ const paymentVerification = async (req, res) => {
       const user = await User.findById(req.user.userid);
       const gameData = await joinedGames.findById(gameId);
       user.joinedGames.push({
+        title:gameData.title,
         gameId,
         joinedAt: new Date(),
         payment_id: razorpay_payment_id,
-        formData
       });
       user.tournaments.participated += 1;
-      gameData.playerdata.push(req.user.userid);
+      gameData.playerdata.push(
+        {id:req.user.userid,userNmae: user.userName,formData});
       gameData.numberofPlayers.currentLeftSpace -= 1;
       const update = await user.save();
       const updateGame = await gameData.save();
