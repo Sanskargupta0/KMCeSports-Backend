@@ -1,14 +1,13 @@
 const io = require("socket.io");
 const GrobalNotification = require("../models/globalNotification");
 const ActiveUser = require("../models/Active_users");
+const user = require("../models/User_model");
 
 module.exports = function (server) {
   const socket = io(server);
 
   socket.on("connection", async (socket) => {
-    console.log("Client connected", socket.id);
     socket.on("join", async (data) => {
-      console.log("join", data);
       if (data.id || data.userName) {
         const { id, userName } = data;
         const user = await ActiveUser.findOne({ userId: id });
@@ -22,27 +21,51 @@ module.exports = function (server) {
             socketId: socket.id,
           }).save();
         }
+      } else {
+        socket.disconnect();
       }
     });
 
-    try {
-      // Fetch all message notifications
-      const notifications = await GrobalNotification.find({}, "-_id") // Exclude the __v field
-        .sort({ "notification.date": -1 }) // Sort by the date field in descending order
-        .limit(10); // Limit the result to 10 documents
+    setTimeout(async () => {
+      try {
+        let notifications;
+        // Fetch all message notifications
+        const globalnotification = await GrobalNotification.find({}, "-_id")
+          .sort({ "notification.date": -1 })
+          .limit(10);
+        const activeUser = await ActiveUser.findOne({ socketId: socket.id });
+        if (activeUser) {
+          const userNotification = await user
+            .findById(activeUser.userId, "notifications")
+            .select("-_id")
+            .sort({ "notification.date": -1 })
+            .limit(10)
+            .lean(); // Convert Mongoose document to plain JavaScript object
+          notifications = [
+            ...userNotification.notifications,
+            ...globalnotification,
+          ];
+        } else {
+          notifications = globalnotification;
+        }
 
-      // Emit the notifications to the connected client
-      socket.emit("initialNotifications", notifications);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
+        // Emit the notifications array to the connected client
+        socket.emit("initialNotifications", notifications);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    }, [2000]);
+
+
+    const letapce =- funation (id)>+{
+      
     }
-
-    setTimeout(async() => {
-      const notifications = await GrobalNotification.find({}, "-_id") // Exclude the __v field
-        .sort({ "notification.date": -1 }) // Sort by the date field in descending order
-        .limit(10); // Limit the result to 10 documents
-      socket.emit("notification", notifications);
-    }, 3000);
+    // setTimeout(async() => {
+    //   const notifications = await GrobalNotification.find({}, "-_id") // Exclude the __v field
+    //     .sort({ "notification.date": -1 }) // Sort by the date field in descending order
+    //     .limit(10); // Limit the result to 10 documents
+    //   socket.emit("newNotification", notifications);
+    // }, 5000);
 
     // Disconnect event
     socket.on("disconnect", async () => {

@@ -66,6 +66,14 @@ const userSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
+  walletId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "KMCWallet",
+  },
+  paymentHistory:{
+    type:Array,
+    default: [],
+  }
 });
 
 //secure password

@@ -1,4 +1,5 @@
 const User = require("../models/User_model");
+const KMCWallet = require("../models/KMCWallet");
 const Otp = require("../models/Otp_model");
 const bcrypt = require("bcrypt");
 const sendMail = require("../utils/sendmail");
@@ -28,6 +29,10 @@ const register = async (req, res) => {
             password: await genrateNewPass(password),
             avatarURL: generateAvatar(),
           });
+          await KMCWallet.updateOne(
+            { "user.id": userExists._id },
+            { "user.name": `${userName}` }
+          );
           res.status(201).json({
             msg: "Reregistation successful",
             email: email.toLowerCase(),
@@ -40,6 +45,15 @@ const register = async (req, res) => {
             email: email.toLowerCase(),
             password,
             avatarURL: generateAvatar(),
+          });
+          await KMCWallet.create({
+            user: {
+              name: `${userName}`,
+              id: userCreated._id,
+            }
+          }).then((wallet) => {
+            userCreated.walletId = wallet._id;
+            userCreated.save();
           });
           res.status(201).json({
             msg: "Registation successful",
@@ -333,6 +347,15 @@ const loginWithSocialMedia = async (req, res) => {
           avatarURL: photoURL,
           phone: userPhone,
           isVerified: true,
+        });
+        await KMCWallet.create({
+          user: {
+            name: `${userName}`,
+            id: userCreated._id,
+          }
+        }).then((wallet) => {
+          userCreated.walletId = wallet._id;
+          userCreated.save();
         });
         const mailSent = await sendMail(email, "login", firstName, password);
         if (mailSent.accepted[0] === `${email}`) {

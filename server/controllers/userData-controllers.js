@@ -8,6 +8,8 @@ const userdata = async (req, res) => {
       .select({
         isVerified: 0,
         isAdmin: 0,
+        walletId: 0,
+        paymentHistory: 0,
       });
     res.status(200).json(userDataFromDB);
   } catch (error) {

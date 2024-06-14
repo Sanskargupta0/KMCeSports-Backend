@@ -11,15 +11,12 @@ const gameRouter = require("./server/router/gameData-router");
 const connectDB = require("./server/utils/db");
 const errorMiddleware = require("./server/middleware/error_middleware");
 const paymentRouter = require("./server/router/payment-router");
-
+const KMCWalletRouter = require("./server/router/wallet-router");
 
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ limit: "1mb", extended: true }));
 app.use((req, res, next) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    `${process.env.FRONTEND_URL}`
-  );
+  res.setHeader("Access-Control-Allow-Origin", `${process.env.FRONTEND_URL}`);
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,CONNECT,TRACE"
@@ -45,6 +42,7 @@ app.use("/", contactRouter);
 app.use("/", userRouter);
 app.use("/", gameRouter);
 app.use("/", paymentRouter);
+app.use("/", KMCWalletRouter);
 
 app.use(errorMiddleware);
 

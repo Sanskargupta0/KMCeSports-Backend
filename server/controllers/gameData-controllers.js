@@ -5,9 +5,7 @@ const UpcommingGames = require("../models/UpcomingEvents_model");
 const gamedata = async (req, res, next) => {
   try {
     const gameData = await Games.find().select({
-      playerdata: 0,
-      "numberofPlayers.currentLeftSpace": 0,
-    });
+      playerdata: 0});
     const commingSoonData = await UpcommingGames.find();
     res.status(200).json({ gameData, commingSoonData });
   } catch (error) {

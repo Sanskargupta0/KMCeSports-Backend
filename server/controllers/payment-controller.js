@@ -1,8 +1,7 @@
 const instance = require("../utils/Razorpay/setup");
 const crypto = require("crypto");
-const User = require("../models/User_model")
-const joinedGames = require("../models/Games_model")
-
+const User = require("../models/User_model");
+const joinedGames = require("../models/Games_model");
 const createOrder = async (req, res) => {
   const { price, gameId } = req.body;
   try {
@@ -55,6 +54,7 @@ const paymentVerification = async (req, res) => {
       gameData.numberofPlayers.currentLeftSpace -= 1;
       const update = await user.save();
       const updateGame = await gameData.save();
+      console.log(gameId, gameData.numberofPlayers.currentLeftSpace );
       if(update && updateGame){
       res.status(200).json({ success: true });
       }
